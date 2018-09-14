@@ -36,6 +36,55 @@ package FM3217_2018 "Collection of models as created in 2018"
       der(ThetaDot) = -g/L * sin(Theta);
 
     end SimplePendulumTut1;
+
+    model Motor
+      Modelica.Electrical.Analog.Basic.Ground ground
+        annotation (Placement(transformation(extent={{-66,-74},{-46,-54}})));
+      Modelica.Electrical.Analog.Basic.Resistor resistor
+        annotation (Placement(transformation(extent={{-58,0},{-38,20}})));
+      Modelica.Electrical.Analog.Basic.Inductor inductor
+        annotation (Placement(transformation(extent={{-12,0},{8,20}})));
+      Modelica.Electrical.Analog.Basic.EMF emf
+        annotation (Placement(transformation(extent={{-2,-40},{18,-20}})));
+      Modelica.Electrical.Analog.Sources.SignalVoltage signalVoltage
+        annotation (Placement(transformation(
+            extent={{10,-10},{-10,10}},
+            rotation=90,
+            origin={-64,-28})));
+      Modelica.Mechanics.Rotational.Components.Inertia inertia
+        annotation (Placement(transformation(extent={{30,-40},{50,-20}})));
+      Modelica.Blocks.Interfaces.RealInput u
+        annotation (Placement(transformation(extent={{-142,-48},{-102,-8}})));
+      Modelica.Mechanics.Rotational.Interfaces.Flange_b flange_b1
+                                              "Right flange of shaft"
+        annotation (Placement(transformation(extent={{92,-40},{112,-20}})));
+    equation
+      connect(signalVoltage.p, resistor.p) annotation (Line(points={{-64,-18},{
+              -64,10},{-58,10}}, color={0,0,255}));
+      connect(resistor.n, inductor.p)
+        annotation (Line(points={{-38,10},{-12,10}}, color={0,0,255}));
+      connect(inductor.n, emf.p)
+        annotation (Line(points={{8,10},{8,-20}}, color={0,0,255}));
+      connect(signalVoltage.n, emf.n) annotation (Line(points={{-64,-38},{-64,
+              -46},{8,-46},{8,-40}}, color={0,0,255}));
+      connect(ground.p, emf.n) annotation (Line(points={{-56,-54},{-56,-46},{8,
+              -46},{8,-40}}, color={0,0,255}));
+      connect(emf.flange, inertia.flange_a)
+        annotation (Line(points={{18,-30},{30,-30}}, color={0,0,0}));
+      connect(u, signalVoltage.v)
+        annotation (Line(points={{-122,-28},{-71,-28}}, color={0,0,127}));
+      connect(inertia.flange_b, flange_b1)
+        annotation (Line(points={{50,-30},{102,-30}}, color={0,0,0}));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end Motor;
+
+    model Motordrive
+      Motor motor
+        annotation (Placement(transformation(extent={{-8,-8},{12,12}})));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end Motordrive;
   end Tutorial2;
   annotation (uses(Modelica(version="3.2.2")));
 end FM3217_2018;
