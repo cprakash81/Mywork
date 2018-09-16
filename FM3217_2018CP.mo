@@ -162,15 +162,18 @@ package FM3217_2018 "Collection of models as created in 2018"
       end Motor;
 
       model DCMachine
+
+        parameter Modelica.SIunits.Resistance R = 0.5 " Resistanc of the armature winding";
+
         Modelica.Electrical.Analog.Basic.Ground ground
           annotation (Placement(transformation(extent={{-66,-74},{-46,-54}})));
-        Modelica.Electrical.Analog.Basic.Resistor resistor(R=0.5)
+        Modelica.Electrical.Analog.Basic.Resistor resistor(R=R)
           annotation (Placement(transformation(extent={{-58,0},{-38,20}})));
-        Modelica.Electrical.Analog.Basic.Inductor inductor(L=0.05)
+        Modelica.Electrical.Analog.Basic.Inductor inductor(L=L)
           annotation (Placement(transformation(extent={{-12,0},{8,20}})));
         Modelica.Electrical.Analog.Basic.EMF emf
           annotation (Placement(transformation(extent={{-2,-40},{18,-20}})));
-        Modelica.Mechanics.Rotational.Components.Inertia inertia(J=0.001)
+        Modelica.Mechanics.Rotational.Components.Inertia inertia(J=J)
           annotation (Placement(transformation(extent={{30,-40},{50,-20}})));
         Modelica.Mechanics.Rotational.Interfaces.Flange_b flange_b1
                                                 "Right flange of shaft"
@@ -180,6 +183,10 @@ package FM3217_2018 "Collection of models as created in 2018"
           annotation (Placement(transformation(extent={{-112,26},{-86,52}})));
         Modelica.Electrical.Analog.Interfaces.NegativePin n
           annotation (Placement(transformation(extent={{-112,-52},{-90,-30}})));
+        parameter Modelica.SIunits.Inductance L=0.1
+          "Inductance of the DC machine";
+        parameter Modelica.SIunits.Inertia J=5 "Inertia of the DC Machine"
+          annotation (Dialog(tab="Mechanical"));
       equation
         connect(resistor.n, inductor.p)
           annotation (Line(points={{-38,10},{-12,10}}, color={0,0,255}));
@@ -195,12 +202,11 @@ package FM3217_2018 "Collection of models as created in 2018"
                 {-101,-41}}, color={0,0,255}));
         connect(ground.p, n) annotation (Line(points={{-56,-54},{-56,-41},{-101,
                 -41}}, color={0,0,255}));
-        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics
-              ={Bitmap(
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false), graphics={
+                Bitmap(
                 extent={{96,-61},{-96,61}},
                 fileName=
                     "modelica://FM3217_2018/../FM3217/Resources/Images/dc-motor.jpg",
-
                 origin={2,-5},
                 rotation=360)}),                                       Diagram(
               coordinateSystem(preserveAspectRatio=false)),
@@ -208,6 +214,77 @@ package FM3217_2018 "Collection of models as created in 2018"
 <p><img src=\"modelica://FM3217_2018/Resources/Images/dc-motor.jpg\"/>This is simple DC Machine model.</p>
 </html>"));
       end DCMachine;
+
+      model Rload "Resistive Load"
+        Modelica.Electrical.Analog.Basic.Resistor resistor(R=R) annotation (
+            Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=-90,
+              origin={0,10})));
+        Modelica.Electrical.Analog.Interfaces.PositivePin p1
+          "Positive pin (potential p.v > n.v for positive voltage drop v)"
+          annotation (Placement(transformation(extent={{-10,88},{10,108}})));
+        Modelica.Electrical.Analog.Interfaces.NegativePin n1
+                      "Negative pin"
+          annotation (Placement(transformation(extent={{-10,-112},{10,-92}})));
+        parameter Modelica.SIunits.Resistance R=0.5 "Load Resistance";
+      equation
+        connect(resistor.p, p1)
+          annotation (Line(points={{0,20},{0,98}}, color={0,0,255}));
+        connect(resistor.n, n1)
+          annotation (Line(points={{0,0},{0,-102}}, color={0,0,255}));
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              coordinateSystem(preserveAspectRatio=false)));
+      end Rload;
+
+      model RLLoad
+        extends Rload;
+        Modelica.Electrical.Analog.Basic.Inductor inductor(L=L_Load)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=-90,
+              origin={-30,10})));
+        parameter Modelica.SIunits.Inductance L_Load=0.1 "Inductive Load";
+      equation
+        connect(inductor.p, p1) annotation (Line(points={{-30,20},{-30,20},{-30,
+                40},{-30,40},{-30,42},{0,42},{0,98}}, color={0,0,255}));
+        connect(inductor.n, n1) annotation (Line(points={{-30,0},{-28,0},{-28,
+                -42},{0,-42},{0,-102}}, color={0,0,255}));
+      end RLLoad;
+
+      model RLCLoad
+        extends RLLoad;
+        Modelica.Electrical.Analog.Basic.Capacitor capacitor(C=C_Load)
+          annotation (Placement(transformation(
+              extent={{-10,-10},{10,10}},
+              rotation=-90,
+              origin={-62,-2})));
+        parameter Modelica.SIunits.Capacitance C_Load=0.001 "Capacitance Load";
+      equation
+        connect(capacitor.p, p1) annotation (Line(points={{-62,8},{-62,8},{-62,
+                32},{-62,32},{-62,42},{0,42},{0,98}}, color={0,0,255}));
+        connect(capacitor.n, n1) annotation (Line(points={{-62,-12},{-62,-12},{
+                -62,-42},{0,-42},{0,-102}}, color={0,0,255}));
+      end RLCLoad;
+
+      model Turbine
+        Modelica.Mechanics.Rotational.Components.Inertia inertia(J=J_t)
+          annotation (Placement(transformation(extent={{-20,-10},{0,10}})));
+        Modelica.Mechanics.Rotational.Sources.ConstantTorque constantTorque(
+            tau_constant=T_t)
+          annotation (Placement(transformation(extent={{76,-8},{56,12}})));
+        Modelica.Mechanics.Rotational.Interfaces.Flange_a flange_a annotation (
+            Placement(transformation(rotation=0, extent={{-110,-10},{-90,10}})));
+        parameter Modelica.SIunits.Inertia J_t "Turbine Inertia";
+        parameter Modelica.SIunits.AngularMomentum T_t=10 "Turbine Torque";
+      equation
+        connect(inertia.flange_b, constantTorque.flange) annotation (Line(
+              points={{0,0},{32,0},{32,2},{56,2}}, color={0,0,0}));
+        connect(flange_a, inertia.flange_a)
+          annotation (Line(points={{-100,0},{-20,0}}, color={0,0,0}));
+        annotation (Icon(graphics={Bitmap(extent={{-94,-88},{86,98}}, fileName=
+                    "modelica://FM3217_2018/Resources/Images/Turbine.png")}));
+      end Turbine;
     end Components;
 
     package Tests
@@ -249,7 +326,7 @@ package FM3217_2018 "Collection of models as created in 2018"
       end Motordrive;
 
       model DCMachineTest
-        Components.DCMachine dCMachine
+        Components.DCMachine dCMachine(R=1)
           annotation (Placement(transformation(extent={{30,-22},{50,28}})));
         Modelica.Electrical.Analog.Sources.SignalVoltage signalVoltage
           annotation (Placement(transformation(
@@ -272,6 +349,28 @@ package FM3217_2018 "Collection of models as created in 2018"
         annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
               coordinateSystem(preserveAspectRatio=false)));
       end DCMachineTest;
+
+      model DCGeneratorTest
+        Components.DCMachine dCMachine(R=1)
+          annotation (Placement(transformation(extent={{-20,-22},{0,28}})));
+        Components.RLCLoad rLCLoad(R=1)
+          annotation (Placement(transformation(extent={{-58,-12},{-38,8}})));
+        Components.Turbine turbine annotation (Placement(transformation(
+                rotation=0, extent={{36,-8},{56,12}})));
+      equation
+        connect(dCMachine.flange_b1,turbine.flange_a)  annotation (Line(points={{0.2,
+                -4.5},{8,-4.5},{8,2},{36,2}},          color={0,0,0}));
+        connect(rLCLoad.p1, dCMachine.p) annotation (Line(points={{-48,7.8},{
+                -34,7.8},{-34,12.75},{-19.9,12.75}}, color={0,0,255}));
+        connect(rLCLoad.n1, dCMachine.n) annotation (Line(points={{-48,-12.2},{
+                -34,-12.2},{-34,-7.25},{-20.1,-7.25}}, color={0,0,255}));
+        annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+              coordinateSystem(preserveAspectRatio=false)));
+      end DCGeneratorTest;
+
+      model DCGeneratorextend
+        extends DCGeneratorTest(rLCLoad(R=2, C_Load=0.003));
+      end DCGeneratorextend;
     end Tests;
   end Tutorial3;
   annotation (uses(Modelica(version="3.2.2")));
