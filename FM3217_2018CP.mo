@@ -373,5 +373,139 @@ package FM3217_2018 "Collection of models as created in 2018"
       end DCGeneratorextend;
     end Tests;
   end Tutorial3;
-  annotation (uses(Modelica(version="3.2.2")));
+
+  package Tutorial4
+    model ElectricKettle
+      Modelica.Electrical.Analog.Basic.Resistor resistor(R=26.45, useHeatPort=
+            true) annotation (Placement(transformation(
+            extent={{-10,10},{10,-10}},
+            rotation=-90,
+            origin={0,24})));
+      Modelica.Electrical.Analog.Basic.Ground ground
+        annotation (Placement(transformation(extent={{-54,-20},{-34,0}})));
+      Modelica.Electrical.Analog.Sources.SineVoltage sineVoltage(freqHz=50, V=
+            sqrt(2)*230) annotation (Placement(transformation(
+            extent={{-10,-10},{10,10}},
+            rotation=-90,
+            origin={-92,26})));
+      Modelica.Electrical.Analog.Sensors.PowerSensor powerSensor
+        annotation (Placement(transformation(extent={{-46,40},{-26,60}})));
+      Modelica.Blocks.Math.Mean mean(f=50) annotation (Placement(transformation(
+            extent={{-7,-7},{7,7}},
+            rotation=270,
+            origin={-51,25})));
+      Modelica.Thermal.HeatTransfer.Components.HeatCapacitor water(C=4.18e3*1.7,
+          T(fixed=true, start=283.15))
+        annotation (Placement(transformation(extent={{16,16},{36,36}})));
+      Modelica.Thermal.HeatTransfer.Celsius.TemperatureSensor temperatureSensor
+        annotation (Placement(transformation(extent={{44,-26},{64,-6}})));
+      Modelica.Electrical.Analog.Ideal.IdealClosingSwitch idealOpeningSwitch
+        annotation (Placement(transformation(extent={{-76,40},{-56,60}})));
+      Modelica.Thermal.HeatTransfer.Components.ThermalConductor
+        thermalConductor(G=5) annotation (Placement(transformation(
+            extent={{-10,-10},{10,10}},
+            rotation=-90,
+            origin={26,-36})));
+      Modelica.Thermal.HeatTransfer.Celsius.FixedTemperature fixedTemperature(T=
+           21) annotation (Placement(transformation(
+            extent={{-10,-10},{10,10}},
+            rotation=90,
+            origin={28,-68})));
+      Modelica.Blocks.Logical.OnOffController onOffController(bandwidth=5)
+        annotation (Placement(transformation(extent={{76,-12},{88,0}})));
+      Modelica.Blocks.Sources.Constant const(k=95)
+        annotation (Placement(transformation(extent={{38,34},{58,54}})));
+    equation
+      connect(sineVoltage.n, resistor.n) annotation (Line(points={{-92,16},{-92,
+              6},{0,6},{0,14}}, color={0,0,255}));
+      connect(ground.p, resistor.n) annotation (Line(points={{-44,0},{-44,6},{0,
+              6},{0,14}}, color={0,0,255}));
+      connect(resistor.p, powerSensor.nc)
+        annotation (Line(points={{0,34},{0,50},{-26,50}}, color={0,0,255}));
+      connect(powerSensor.nv, resistor.n) annotation (Line(points={{-36,40},{
+              -36,6},{0,6},{0,14}}, color={0,0,255}));
+      connect(powerSensor.pv, powerSensor.nc) annotation (Line(points={{-36,60},
+              {0,60},{0,50},{-26,50}}, color={0,0,255}));
+      connect(powerSensor.power, mean.u) annotation (Line(points={{-44,39},{-48,
+              39},{-48,33.4},{-51,33.4}}, color={0,0,127}));
+      connect(powerSensor.pc, idealOpeningSwitch.n)
+        annotation (Line(points={{-46,50},{-56,50}}, color={0,0,255}));
+      connect(idealOpeningSwitch.p, sineVoltage.p) annotation (Line(points={{
+              -76,50},{-92,50},{-92,36}}, color={0,0,255}));
+      connect(water.port, thermalConductor.port_a)
+        annotation (Line(points={{26,16},{26,-26}}, color={191,0,0}));
+      connect(thermalConductor.port_b, fixedTemperature.port) annotation (Line(
+            points={{26,-46},{28,-46},{28,-58}}, color={191,0,0}));
+      connect(temperatureSensor.port, thermalConductor.port_a) annotation (Line(
+            points={{44,-16},{26,-16},{26,-26}}, color={191,0,0}));
+      connect(resistor.heatPort, thermalConductor.port_a) annotation (Line(
+            points={{10,24},{10,-2},{26,-2},{26,-26}}, color={191,0,0}));
+      connect(temperatureSensor.T, onOffController.u) annotation (Line(points={
+              {64,-16},{66,-16},{66,-9.6},{74.8,-9.6}}, color={0,0,127}));
+      connect(const.y, onOffController.reference) annotation (Line(points={{59,
+              44},{64,44},{64,-2.4},{74.8,-2.4}}, color={0,0,127}));
+      connect(onOffController.y, idealOpeningSwitch.control) annotation (Line(
+            points={{88.6,-6},{94,-6},{94,82},{-66,82},{-66,57}}, color={255,0,
+              255}));
+      annotation (Icon(coordinateSystem(preserveAspectRatio=false)), Diagram(
+            coordinateSystem(preserveAspectRatio=false)));
+    end ElectricKettle;
+  end Tutorial4;
+
+  model Pipemodel
+    HydroPower.HydroSystems.Pipe pipe(horizontalIcon=true, L=100)
+      annotation (Placement(transformation(extent={{4,58},{24,78}})));
+    inner HydroPower.System_HPL system_HPL(steadyState=true,
+        constantTemperature=true)
+      annotation (Placement(transformation(extent={{-100,80},{-80,100}})));
+    HydroPower.SinksAndSources.Fixed_pT source(paraOption=false)
+      annotation (Placement(transformation(extent={{-34,58},{-14,78}})));
+    HydroPower.SinksAndSources.Fixed_pT Sink(paraOption=false) annotation (
+        Placement(transformation(
+          extent={{10,-10},{-10,10}},
+          rotation=0,
+          origin={56,68})));
+  equation
+    connect(pipe.b, Sink.b)
+      annotation (Line(points={{25,68},{45,68}}, color={0,0,255}));
+    connect(pipe.a, source.b)
+      annotation (Line(points={{3,68},{-13,68}}, color={0,0,255}));
+    annotation (
+      Icon(coordinateSystem(preserveAspectRatio=false)),
+      Diagram(coordinateSystem(preserveAspectRatio=false)),
+      experiment(Tolerance=1e-005, __Dymola_Algorithm="Radau"));
+  end Pipemodel;
+
+  model Pipwithvalve
+    extends Pipemodel(pipe(ZL=90));
+    HydroPower.SinksAndSources.Fixed_pT source1(paraOption=false)
+      annotation (Placement(transformation(extent={{-34,14},{-14,34}})));
+    HydroPower.SinksAndSources.Fixed_pT Sink1(paraOption=false) annotation (
+        Placement(transformation(
+          extent={{10,-10},{-10,10}},
+          rotation=0,
+          origin={58,24})));
+    HydroPower.HydroSystems.PipeValve pipeValve1
+      annotation (Placement(transformation(extent={{6,12},{26,32}})));
+    Modelica.Blocks.Sources.Ramp ramp(
+      duration=100,
+      offset=0.1,
+      startTime=100)
+      annotation (Placement(transformation(extent={{-86,26},{-66,46}})));
+  equation
+    connect(pipeValve1.ValveCtrl, ramp.y) annotation (Line(points={{16,33},{16,
+            42},{-65,42},{-65,36}}, color={0,0,127}));
+    connect(source1.b, pipeValve1.a) annotation (Line(points={{-13,24},{-4,24},
+            {-4,22},{5,22}}, color={0,0,255}));
+    connect(Sink1.b, pipeValve1.b) annotation (Line(points={{47,24},{38,24},{38,
+            22},{27,22}}, color={0,0,255}));
+    annotation (Documentation(info="<html>
+<p>Information</p>
+<p><br>P = </p>
+<p><br>P = 100 MW</p>
+<p>H = 90 </p>
+<p>Q = </p>
+</html>"));
+  end Pipwithvalve;
+  annotation (uses(Modelica(version="3.2.2"), HydroPower(version="2.7")));
 end FM3217_2018;
